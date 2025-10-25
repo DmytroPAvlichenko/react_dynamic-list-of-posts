@@ -33,20 +33,8 @@ export const PostDetails: React.FC<Props> = ({
     client
       .post<Comment>('/comments', { email, body, name, postId: postSelect?.id })
       .then(comment => onCommentsList(comment))
-      .catch(error => {
-        setErrorPost(true);
-        throw error;
-      })
+      .catch(() => setErrorPost(true))
       .finally(() => setIsFormLoading(false));
-  };
-
-  const handleDeleteComment = (comentId: number) => {
-    onCommentsList(comentId);
-
-    client.delete(`/comments/${comentId}`).catch(error => {
-      setErrorPost(true);
-      throw error;
-    });
   };
 
   return (
@@ -93,7 +81,7 @@ export const PostDetails: React.FC<Props> = ({
                     type="button"
                     className="delete is-small"
                     aria-label="delete"
-                    onClick={() => handleDeleteComment(comment.id)}
+                    onClick={() => onCommentsList(comment.id)}
                   >
                     delete button
                   </button>

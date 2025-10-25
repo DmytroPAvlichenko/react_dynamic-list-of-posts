@@ -16,17 +16,21 @@ import { Comment } from './types/Comment';
 
 export const App = () => {
   const [usersList, setUserList] = useState<User[]>([]);
-  const [postsList, setPostsList] = useState<Post[] | undefined>(undefined);
-  const [commentsList, setCommentsList] = useState<Comment[]>([]);
   const [userSelect, setUserSelect] = useState<User | null>(null);
+
+  const [postsList, setPostsList] = useState<Post[] | undefined>(undefined);
   const [postSelect, setPostSelect] = useState<Post | undefined>(undefined);
   const [isPostLoader, setIsPostLoader] = useState(false);
-  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
   const [errorPostInfo, setErrorPostInfo] = useState(false);
+
+  const [commentsList, setCommentsList] = useState<Comment[]>([]);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
   const [errorComments, setErrorComments] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [openCommentForm, setOpenCommentForm] = useState(false);
   const [openCommentList, setOpenCommentList] = useState(false);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     client
@@ -51,10 +55,7 @@ export const App = () => {
     client
       .get<Post[]>(`/posts?userId=${user.id}`)
       .then(posts => setPostsList(posts))
-      .catch(error => {
-        setErrorPostInfo(true);
-        throw error;
-      })
+      .catch(() => setErrorPostInfo(true))
       .finally(() => setIsPostLoader(false));
   };
 
@@ -69,10 +70,7 @@ export const App = () => {
     client
       .get<Comment[]>(`/comments?postId=${post.id}`)
       .then(comments => setCommentsList(comments))
-      .catch(error => {
-        setErrorComments(true);
-        throw error;
-      })
+      .catch(() => setErrorComments(true))
       .finally(() => setIsCommentsLoading(false));
   };
 
@@ -88,6 +86,10 @@ export const App = () => {
       setCommentsList((currentList: Comment[]) =>
         currentList.filter(comment => comment.id !== data),
       );
+      client.delete(`/comments/${data}`).catch(() => {
+        setCommentsList(commentsList);
+        setErrorComments(true);
+      });
     } else {
       setCommentsList(currentList => [...currentList, data]);
     }
