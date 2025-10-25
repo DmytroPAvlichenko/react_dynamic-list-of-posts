@@ -1,107 +1,123 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Loader } from './Loader';
+import { Comment, CommentData } from '../types/Comment';
+import { Post } from '../types/Post';
 import { NewCommentForm } from './NewCommentForm';
+import { client } from '../utils/fetchClient';
 
-export const PostDetails: React.FC = () => {
+type Props = {
+  errorComments: boolean;
+  isLoader: boolean;
+  openCommentForm: boolean;
+  commentsList: Comment[];
+  postSelect: Post | undefined;
+  setCommentsList: (commen: Comment | number) => void;
+  setOpenCommentForm: (styte: boolean) => void;
+};
+
+export const PostDetails: React.FC<Props> = ({
+  errorComments,
+  isLoader,
+  openCommentForm,
+  commentsList,
+  postSelect,
+  setOpenCommentForm,
+  setCommentsList,
+}) => {
+  const [isFormLoading, setIsFormLoading] = useState(false);
+
+  const handleOnSubmit = ({ email, body, name }: CommentData) => {
+    setIsFormLoading(true);
+
+    client
+      .post<Comment>('/comments', { email, body, name, postId: postSelect?.id })
+      .then(comment => setCommentsList(comment))
+      .catch(error => {
+        throw error;
+      })
+      .finally(() => setIsFormLoading(false));
+  };
+
+  const handleDeleteComment = (comentId: number) => {
+    setCommentsList(comentId);
+
+    client.delete(`/comments/${comentId}`).catch(error => {
+      throw error;
+    });
+  };
+
   return (
     <div className="content" data-cy="PostDetails">
-      <div className="content" data-cy="PostDetails">
-        <div className="block">
-          <h2 data-cy="PostTitle">
-            #18: voluptate et itaque vero tempora molestiae
-          </h2>
+      <div className="block">
+        <h2 data-cy="PostTitle">
+          {`#${postSelect?.id}: ${postSelect?.title}`}
+        </h2>
 
-          <p data-cy="PostBody">
-            eveniet quo quis laborum totam consequatur non dolor ut et est
-            repudiandae est voluptatem vel debitis et magnam
-          </p>
-        </div>
-
-        <div className="block">
-          <Loader />
-
-          <div className="notification is-danger" data-cy="CommentsError">
-            Something went wrong
-          </div>
-
-          <p className="title is-4" data-cy="NoCommentsMessage">
-            No comments yet
-          </p>
-
-          <p className="title is-4">Comments:</p>
-
-          <article className="message is-small" data-cy="Comment">
-            <div className="message-header">
-              <a href="mailto:misha@mate.academy" data-cy="CommentAuthor">
-                Misha Hrynko
-              </a>
-              <button
-                data-cy="CommentDelete"
-                type="button"
-                className="delete is-small"
-                aria-label="delete"
-              >
-                delete button
-              </button>
-            </div>
-
-            <div className="message-body" data-cy="CommentBody">
-              Some comment
-            </div>
-          </article>
-
-          <article className="message is-small" data-cy="Comment">
-            <div className="message-header">
-              <a href="mailto:misha@mate.academy" data-cy="CommentAuthor">
-                Misha Hrynko
-              </a>
-
-              <button
-                data-cy="CommentDelete"
-                type="button"
-                className="delete is-small"
-                aria-label="delete"
-              >
-                delete button
-              </button>
-            </div>
-            <div className="message-body" data-cy="CommentBody">
-              One more comment
-            </div>
-          </article>
-
-          <article className="message is-small" data-cy="Comment">
-            <div className="message-header">
-              <a href="mailto:misha@mate.academy" data-cy="CommentAuthor">
-                Misha Hrynko
-              </a>
-
-              <button
-                data-cy="CommentDelete"
-                type="button"
-                className="delete is-small"
-                aria-label="delete"
-              >
-                delete button
-              </button>
-            </div>
-
-            <div className="message-body" data-cy="CommentBody">
-              {'Multi\nline\ncomment'}
-            </div>
-          </article>
-
-          <button
-            data-cy="WriteCommentButton"
-            type="button"
-            className="button is-link"
-          >
-            Write a comment
-          </button>
-        </div>
-
-        <NewCommentForm />
+        <p data-cy="PostBody">{postSelect?.body}</p>
       </div>
+
+      <div className="block">
+        {isLoader && <Loader />}
+
+        {!isLoader && (
+          <>
+            {!errorComments && commentsList.length === 0 && (
+              <p className="title is-4" data-cy="NoCommentsMessage">
+                No comments yet
+              </p>
+            )}
+            {errorComments && (
+              <div className="notification is-danger" data-cy="CommentsError">
+                Something went wrong
+              </div>
+            )}
+
+            {!errorComments && <p className="title is-4">Comments:</p>}
+
+            {commentsList.map(comment => (
+              <article
+                className="message is-small"
+                data-cy="Comment"
+                key={comment.id}
+              >
+                <div className="message-header">
+                  <a href={`mailto:${comment.email}`} data-cy="CommentAuthor">
+                    {comment.name}
+                  </a>
+                  <button
+                    data-cy="CommentDelete"
+                    type="button"
+                    className="delete is-small"
+                    aria-label="delete"
+                    onClick={() => handleDeleteComment(comment.id)}
+                  >
+                    delete button
+                  </button>
+                </div>
+
+                <div className="message-body" data-cy="CommentBody">
+                  {comment.body}
+                </div>
+              </article>
+            ))}
+
+            {!openCommentForm && !errorComments && (
+              <button
+                data-cy="WriteCommentButton"
+                type="button"
+                className="button is-link"
+                onClick={() => setOpenCommentForm(!openCommentForm)}
+              >
+                Write a comment
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {openCommentForm && (
+        <NewCommentForm onSubmit={handleOnSubmit} loaderForm={isFormLoading} />
+      )}
     </div>
   );
 };
