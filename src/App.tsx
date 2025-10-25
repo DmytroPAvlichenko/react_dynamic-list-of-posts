@@ -42,6 +42,8 @@ export const App = () => {
   const handlePostList = (user: User) => {
     setIsPostLoader(true);
     setPostsList(undefined);
+    setCommentsList([]);
+    setPostSelect(undefined);
     setErrorPostInfo(false);
     setUserSelect(user);
     setIsSidebarOpen(false);
@@ -84,7 +86,7 @@ export const App = () => {
   const handleCommentsList = (data: Comment | number) => {
     if (typeof data === 'number') {
       setCommentsList((currentList: Comment[]) =>
-        currentList.filter(coment => coment.id !== data),
+        currentList.filter(comment => comment.id !== data),
       );
     } else {
       setCommentsList(currentList => [...currentList, data]);
@@ -101,7 +103,7 @@ export const App = () => {
                 <UserSelector
                   usersList={usersList}
                   userSelect={userSelect}
-                  setUserSelect={handlePostList}
+                  onUserSelect={handlePostList}
                 />
               </div>
 
@@ -130,8 +132,8 @@ export const App = () => {
                   <PostsList
                     postSelect={postSelect}
                     postList={postsList}
-                    handlePostInfo={handlePostInfo}
-                    handleClosePostInfo={handleClosePostInfo}
+                    onPostSelect={handlePostInfo}
+                    onPostClose={handleClosePostInfo}
                   />
                 )}
               </div>
@@ -158,8 +160,8 @@ export const App = () => {
                   postSelect={postSelect}
                   commentsList={commentsList}
                   isLoader={isCommentsLoading}
-                  setCommentsList={handleCommentsList}
-                  setOpenCommentForm={setOpenCommentForm}
+                  onCommentsList={handleCommentsList}
+                  onOpenCommentForm={setOpenCommentForm}
                 />
               </div>
             )}

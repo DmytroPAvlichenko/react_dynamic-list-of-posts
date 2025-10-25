@@ -17,7 +17,6 @@ export const NewCommentForm: React.FC<Props> = ({ onSubmit, loaderForm }) => {
   const [inputBody, setInputBody] = useState('');
   const [errorBody, setErrorBody] = useState(false);
 
-  //#region handelValue
   const handleNameValue = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
@@ -38,7 +37,6 @@ export const NewCommentForm: React.FC<Props> = ({ onSubmit, loaderForm }) => {
     setErrorBody(false);
     setInputBody(newValue);
   };
-  //#endregion
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

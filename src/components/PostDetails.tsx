@@ -6,13 +6,13 @@ import { NewCommentForm } from './NewCommentForm';
 import { client } from '../utils/fetchClient';
 
 type Props = {
-  errorComments: boolean;
   isLoader: boolean;
+  errorComments: boolean;
   openCommentForm: boolean;
   commentsList: Comment[];
   postSelect: Post | undefined;
-  setCommentsList: (commen: Comment | number) => void;
-  setOpenCommentForm: (styte: boolean) => void;
+  onCommentsList: (commen: Comment | number) => void;
+  onOpenCommentForm: (styte: boolean) => void;
 };
 
 export const PostDetails: React.FC<Props> = ({
@@ -21,27 +21,30 @@ export const PostDetails: React.FC<Props> = ({
   openCommentForm,
   commentsList,
   postSelect,
-  setOpenCommentForm,
-  setCommentsList,
+  onOpenCommentForm,
+  onCommentsList,
 }) => {
   const [isFormLoading, setIsFormLoading] = useState(false);
+  const [errorPost, setErrorPost] = useState(false);
 
   const handleOnSubmit = ({ email, body, name }: CommentData) => {
     setIsFormLoading(true);
 
     client
       .post<Comment>('/comments', { email, body, name, postId: postSelect?.id })
-      .then(comment => setCommentsList(comment))
+      .then(comment => onCommentsList(comment))
       .catch(error => {
+        setErrorPost(true);
         throw error;
       })
       .finally(() => setIsFormLoading(false));
   };
 
   const handleDeleteComment = (comentId: number) => {
-    setCommentsList(comentId);
+    onCommentsList(comentId);
 
     client.delete(`/comments/${comentId}`).catch(error => {
+      setErrorPost(true);
       throw error;
     });
   };
@@ -61,18 +64,19 @@ export const PostDetails: React.FC<Props> = ({
 
         {!isLoader && (
           <>
-            {!errorComments && commentsList.length === 0 && (
+            {(!errorComments || errorPost) && commentsList.length === 0 && (
               <p className="title is-4" data-cy="NoCommentsMessage">
                 No comments yet
               </p>
             )}
-            {errorComments && (
+
+            {(errorComments || errorPost) && (
               <div className="notification is-danger" data-cy="CommentsError">
                 Something went wrong
               </div>
             )}
 
-            {!errorComments && <p className="title is-4">Comments:</p>}
+            {!errorPost && <p className="title is-4">Comments:</p>}
 
             {commentsList.map(comment => (
               <article
@@ -101,12 +105,12 @@ export const PostDetails: React.FC<Props> = ({
               </article>
             ))}
 
-            {!openCommentForm && !errorComments && (
+            {!openCommentForm && !errorPost && !errorComments && (
               <button
                 data-cy="WriteCommentButton"
                 type="button"
                 className="button is-link"
-                onClick={() => setOpenCommentForm(!openCommentForm)}
+                onClick={() => onOpenCommentForm(!openCommentForm)}
               >
                 Write a comment
               </button>

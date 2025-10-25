@@ -4,14 +4,14 @@ import cn from 'classnames';
 
 type Props = {
   usersList: User[];
-  setUserSelect: (user: User) => void;
+  onUserSelect: (user: User) => void;
   userSelect: User | null;
 };
 
 export const UserSelector: React.FC<Props> = ({
   usersList,
   userSelect,
-  setUserSelect,
+  onUserSelect,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -69,7 +69,7 @@ export const UserSelector: React.FC<Props> = ({
               key={user.id}
               onClick={() => {
                 setIsDropdownOpen(false);
-                setUserSelect(user);
+                onUserSelect(user);
               }}
             >
               {user.name}

@@ -5,15 +5,15 @@ import { Post } from '../types/Post';
 type Props = {
   postList: Post[];
   postSelect: Post | undefined;
-  handlePostInfo: (post: Post) => void;
-  handleClosePostInfo: () => void;
+  onPostSelect: (post: Post) => void;
+  onPostClose: () => void;
 };
 
 export const PostsList: React.FC<Props> = ({
   postList,
   postSelect,
-  handlePostInfo,
-  handleClosePostInfo,
+  onPostSelect,
+  onPostClose,
 }) => (
   <div data-cy="PostsList">
     <p className="title">Posts:</p>
@@ -41,7 +41,7 @@ export const PostsList: React.FC<Props> = ({
                   type="button"
                   data-cy="PostButton"
                   className="button is-link"
-                  onClick={handleClosePostInfo}
+                  onClick={onPostClose}
                 >
                   Close
                 </button>
@@ -54,7 +54,7 @@ export const PostsList: React.FC<Props> = ({
                   className={cn('button is-link', {
                     'is-light': postSelect?.id !== post.id,
                   })}
-                  onClick={() => handlePostInfo(post)}
+                  onClick={() => onPostSelect(post)}
                 >
                   Open
                 </button>
